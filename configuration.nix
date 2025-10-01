@@ -9,6 +9,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 5;
+  boot.kernelParams = [ "split_lock_detect=warn" ];
   
   boot.loader.efi.canTouchEfiVariables = true;
   nixpkgs.config.allowUnfree = true;
@@ -21,20 +22,36 @@
   networking.networkmanager.enable = true;
 
   hardware.bluetooth = {
-  enable = true;
-  powerOnBoot = true;
-  settings = {
-    General = {
-      Experimental = true;
-      ControllerMode = "bredr";
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Experimental = true;
+        ControllerMode = "bredr";
 
-      FastConnectable = true;
-    };
-    Policy = {
-      AutoEnable = true;
+        FastConnectable = true;
+      };
+      Policy = {
+        AutoEnable = true;
+      };
     };
   };
-};
+
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 22 ];
+    allowedUDPPorts = [ ];    
+  };
+
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "mydatabase" "testdb" ];
+    authentication = pkgs.lib.mkOverride 10 ''
+      #type database  DBuser  auth-method
+      local all       all     trust
+    '';
+  };
+
 
 
 
@@ -45,10 +62,13 @@
      pulse.enable = true;
    };
 
+
+  services.xserver.enable = true;
+  services.xserver.videoDrivers = [ "amdgpu" ];
+
   services = {
      desktopManager.plasma6.enable = true;
-     displayManager.sddm.enable = true;
-     displayManager.sddm.wayland.enable = true;
+     displayManager.ly.enable = true;
    };
 
 
@@ -60,10 +80,10 @@
 
   programs.firefox.enable = true;
   programs.zsh.enable = true;
+  programs.steam.enable = true;
 
 
   
-
   nix.settings.experimental-features = ["nix-command" "flakes"];
   home-manager.backupFileExtension = "backup";
 

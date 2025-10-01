@@ -15,7 +15,13 @@
     unzip
     krita
     qbittorrent
+    gh
+    pgadmin4
+    go
+    nixfmt-rfc-style
+    steam-run
   ];
+
 
   programs.zsh = {
     enable = true;
@@ -26,18 +32,53 @@
 
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "rust" "kitty" ];
+      plugins = [
+        "git"
+        "rust"
+        "kitty"
+      ];
       theme = "agnoster";
     };
   };
+  
 
   programs.neovim = {
     enable = true;
-    extraConfig = ''
-      set number relativenumber
+    plugins =
+      let
+        nvim-treesitter-with-plugins = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          treesitter-plugins: with treesitter-plugins; [
+            bash
+            lua
+            nix
+            python
+            go
+          ]
+        );
+      in
+      with pkgs.vimPlugins;
+      [
+        nvim-lspconfig
+        plenary-nvim
+        nvim-treesitter-with-plugins
+        nvim-autopairs
+      ];
+    extraLuaConfig = ''
+
+      require("nvim-treesitter.configs").setup {
+        highlight = { enable = true },
+        indent = { enable = true },
+      }
+
+      vim.opt.tabstop = 4
+      vim.opt.shiftwidth = 4
+      vim.opt.expandtab = true
+      vim.opt.smartindent = true
+      vim.opt.autoindent = true
+      vim.opt.cindent = true
     '';
   };
-
+  
   programs.kitty = {
     enable = true;
     themeFile = "Dracula";
